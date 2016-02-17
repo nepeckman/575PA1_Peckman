@@ -65,53 +65,62 @@ public class Sphere implements Surface{
 	}
 
 	@Override
-	public float greenLight(Ray ray, LightSource light) {
-		double t = this.intersectPoint(ray, 0, 1000000000);
-		Vector3 rayV = ray.getVector();
-		Point3 rayO = ray.getOrigin();
-		Point3 phit = new Point3(rayO.getX()+t*rayV.getX(), rayO.getY()+t*rayV.getY(), rayO.getZ()+t*rayV.getZ());
-		Vector3 n = getNormal(ray);
-		Vector3 l = new Vector3(light.getPosition().subtractPoint(phit));
-		Vector3 v = new Vector3(-rayV.getX(), -rayV.getY(), -rayV.getZ());
-		Vector3 vl = v.addVector3(l);
-		Vector3 h = Vector3.normalize(vl);
-		float ka = this.surface.getAmbient().getGreen();
-		float kd = this.surface.getDiffuse().getGreen();
-		float ks = this.surface.getSpecular().getGreen();
-		return (float) (ka + kd*Math.max(0, n.dotProduct(l))+ ks*Math.pow(Math.max(0, n.dotProduct(h)), surface.getSpecularPower()));
+	public float greenLight(Ray ray, LightSource light, Surface[] surfaces) {
+		return calculateLight(ray, light, surfaces, surface.getAmbient().getGreen(), surface.getDiffuse().getGreen(), surface.getSpecular().getGreen());
 	}
 
 	@Override
-	public float redLight(Ray ray, LightSource light) {
-		double t = this.intersectPoint(ray, 0, 1000000000);
-		Vector3 rayV = ray.getVector();
-		Point3 rayO = ray.getOrigin();
-		Point3 phit = new Point3(rayO.getX()+t*rayV.getX(), rayO.getY()+t*rayV.getY(), rayO.getZ()+t*rayV.getZ());
-		Vector3 n = getNormal(ray);
-		Vector3 l = new Vector3(light.getPosition().subtractPoint(phit));
-		Vector3 v = new Vector3(-rayV.getX(), -rayV.getY(), -rayV.getZ());
-		Vector3 vl = v.addVector3(l);
-		Vector3 h = Vector3.normalize(vl);
-		float ka = this.surface.getAmbient().getRed();
-		float kd = this.surface.getDiffuse().getRed();
-		float ks = this.surface.getSpecular().getRed();
-		return (float) (ka + kd*Math.max(0, n.dotProduct(l))+ks*Math.pow(Math.max(0, n.dotProduct(h)), surface.getSpecularPower()));
+	public float redLight(Ray ray, LightSource light, Surface[] surfaces) {
+		return calculateLight(ray, light, surfaces, surface.getAmbient().getRed(), surface.getDiffuse().getRed(), surface.getSpecular().getRed());
 	}
 
 	@Override
-	public float blueLight(Ray ray, LightSource light) {
-		double t = this.intersectPoint(ray, 0, 1000000000);
+	public float blueLight(Ray ray, LightSource light, Surface[] surfaces) {
+		return calculateLight(ray, light, surfaces, surface.getAmbient().getBlue(), surface.getDiffuse().getBlue(), surface.getSpecular().getBlue());
+	}
+	
+	private float calculateLight(Ray ray, LightSource light, Surface[] surfaces, float ka, float kd, float ks)
+	{
+		double t = this.intersectPoint(ray, 0, 1000000000) - 0.01;
 		Vector3 rayV = ray.getVector();
 		Point3 rayO = ray.getOrigin();
 		Point3 phit = new Point3(rayO.getX()+t*rayV.getX(), rayO.getY()+t*rayV.getY(), rayO.getZ()+t*rayV.getZ());
 		Vector3 n = getNormal(ray);
 		Vector3 l = new Vector3(light.getPosition().subtractPoint(phit));
+		l = Vector3.normalize(l);
 		Vector3 v = new Vector3(-rayV.getX(), -rayV.getY(), -rayV.getZ());
+		v = Vector3.normalize(v);
 		Vector3 vl = v.addVector3(l);
 		Vector3 h = Vector3.normalize(vl);
-		float ka = this.surface.getAmbient().getBlue();
-		float kd = this.surface.getDiffuse().getBlue();
-		float ks = this.surface.getSpecular().getBlue();
+		Ray shadow = new Ray(phit, l);
+		if(hitsShadow(surfaces, shadow))
+		{
+			kd = 0;
+			ks = 0;
+		}
 		return (float) (ka + kd*Math.max(0, n.dotProduct(l))+ks*Math.pow(Math.max(0, n.dotProduct(h)), surface.getSpecularPower()));
+	}
+	
+	private boolean hitsShadow(Surface[] surfaces, Ray ray)
+	{
+		Surface hit_surface = null;
+		double t = 1000000000;
+		for(int idx = 0; idx < surfaces.length; idx++)
+		{
+			if(surfaces[idx].intersectsRay(ray, 0, t))
+			{
+				t = surfaces[idx].intersectPoint(ray, 0, t);
+				hit_surface = surfaces[idx];
+			}
+		}
+		
+		if(hit_surface == null)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 }

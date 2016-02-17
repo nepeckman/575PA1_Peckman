@@ -31,7 +31,7 @@ public class Picture1 extends JFrame implements GLEventListener {
 	Viewrect viewrect = new Viewrect(-0.1, 0.1, -0.1, 0.1, 0.1, width, height, camera);
 	
 	public Picture1() {
-		super(name + "'s Raytracer");
+		super(name + "'s Raytracer: Scene 1");
 		this.scene = renderScene();
 		
 		GLProfile profile = GLProfile.get(GLProfile.GL2);

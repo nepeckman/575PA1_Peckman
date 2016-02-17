@@ -22,4 +22,9 @@ public class Camera {
 	{
 		return new Ray(this.position, new Vector3(pixel.getPosition(), this.position));
 	}
+	
+	public Ray getRay(Point3 point)
+	{
+		return new Ray(this.position, new Vector3(point, this.position));
+	}
 }

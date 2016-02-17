@@ -14,7 +14,7 @@ import scene.*;
 
 import javax.swing.JFrame;
 
-public class Picture2 extends JFrame implements GLEventListener {
+public class Picture3 extends JFrame implements GLEventListener {
 	final static String name = "Nicolas";
 	
 	final int width = 512;
@@ -30,8 +30,8 @@ public class Picture2 extends JFrame implements GLEventListener {
 	LightSource light;
 	Viewrect viewrect;
 	
-	public Picture2() {
-		super(name + "'s Raytracer: Scene 2");
+	public Picture3() {
+		super(name + "'s Raytracer: Scene 3");
 		plane = new Plane(new Point3(0, -2, 0), new Vector3(0, 1, 0), new SurfaceInfo(new Light(0.2f,0.2f,0.2f), new Light(1,1,1), new Light(0,0,0), 0));
 		sphere1 = new Sphere(1, new Point3(-4, 0, -7), new SurfaceInfo(new Light(0.2f,0,0), new Light(1,0,0), new Light(0,0,0), 0));
 		sphere2 = new Sphere(2, new Point3(0, 0, -7), new SurfaceInfo(new Light(0,0.2f,0), new Light(0,0.5f,0), new Light(0.5f,0.5f,0.5f), 32));
@@ -65,18 +65,36 @@ public class Picture2 extends JFrame implements GLEventListener {
 	
 	public Buffer renderScene() {
 		float[] data = new float[width * height * 3];
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int i = (y * height) + x;
-				i *= 3;
-				Ray ray = camera.getRay(new Pixel(x, y, viewrect));
-				float[] pixelcolor = pixelColor(ray);
-				data[i + 0] = pixelcolor[0];
-				data[i + 1] = pixelcolor[1];
-				data[i + 2] = pixelcolor[2];
+		float[][] samples = new float[64][width * height * 3];
+		for(int idx = 0; idx < samples.length; idx++)
+		{
+			float[] sample = new float[width * height * 3];
+			for (int y = 0; y < height; y++) 
+			{
+				for (int x = 0; x < width; x++) 
+				{
+					int i = (y * height) + x;
+					i *= 3;
+					Point3 center = new Pixel(x, y, viewrect).getPosition();
+					Point3 variation = new Point3(0.0002*Math.random(), 0.0002*Math.random(), 0);
+					int sign = (int) Math.ceil(2*Math.random());
+					Point3 point = (sign == 1) ? center.subtractPoint(variation) : center.addPoint(variation);
+					Ray ray = camera.getRay(point);
+					float[] pixelcolor = pixelColor(ray);
+					sample[i + 0] = pixelcolor[0];
+					sample[i + 1] = pixelcolor[1];
+					sample[i + 2] = pixelcolor[2];
+				}
+			}
+			samples[idx] = sample;
+		}
+		for(int pIdx = 0; pIdx<samples[0].length; pIdx++)
+		{
+			for(int sIdx = 0; sIdx<samples.length; sIdx++)
+			{
+				data[pIdx] += samples[sIdx][pIdx]/64;
 			}
 		}
-		
 		return FloatBuffer.wrap(data);
 	}
 	
@@ -129,6 +147,6 @@ public class Picture2 extends JFrame implements GLEventListener {
 	}
 	
 	public static void main(String[] args) {
-		Picture2 pic2 = new Picture2();
+		Picture3 pic3 = new Picture3();
 	}
 }
