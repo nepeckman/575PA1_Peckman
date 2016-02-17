@@ -11,6 +11,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 import geometry.*;
 import scene.*;
+
 import javax.swing.JFrame;
 
 public class Picture2 extends JFrame implements GLEventListener {
@@ -63,8 +64,11 @@ public class Picture2 extends JFrame implements GLEventListener {
 	}
 	
 	public Buffer renderScene() {
+		Ray test = new Ray(new Point3(0,0,0), new Vector3(0, -1, -1));
+		boolean intersects = plane.intersectsRay(test, 0, 1000);
+		double t = plane.intersectPoint(test, 0, 1000);
+		System.out.println(intersects + " " + t);
 		float[] data = new float[width * height * 3];
-		
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int i = (y * height) + x;

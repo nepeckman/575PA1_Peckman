@@ -20,6 +20,6 @@ public class Camera {
 	
 	public Ray getRay(Pixel pixel)
 	{
-		return new Ray(this.position, new Vector3(this.position, pixel.getPosition()));
+		return new Ray(this.position, new Vector3(pixel.getPosition(), this.position));
 	}
 }

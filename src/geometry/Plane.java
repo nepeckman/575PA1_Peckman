@@ -32,10 +32,10 @@ public class Plane implements Surface{
 		Vector3 n = Vector3.normalize(normal);
 		Vector3 l = Vector3.normalize(ray.getVector());
 		double denom = n.dotProduct(l);
-		if(denom > 0.0000001)
+		if(denom < -0.0000001)
 		{
 			double t = n.dotProduct(p0l0) / denom;
-			return (-t>=min && -t<=max);
+			return (t>=min && t<=max);
 		} else
 		{
 			return false;
@@ -46,10 +46,10 @@ public class Plane implements Surface{
 	public double intersectPoint(Ray ray, double min, double max) 
 	{
 		double denom = ray.getVector().dotProduct(normal);
-		if(denom > 0.0000001)
+		if(denom < -0.0000001)
 		{
 			double t = normal.dotProduct((point.subtractPoint(ray.getOrigin()))) / denom;
-			return Math.min(max, -t);
+			return Math.min(max, t);
 		} else
 		{
 			return -1;
